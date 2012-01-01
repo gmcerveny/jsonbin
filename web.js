@@ -1,3 +1,5 @@
+PORT = 8000;
+
 var http = require ('http');
 
 var s = http.createServer(function(req, res){ 
@@ -5,4 +7,4 @@ var s = http.createServer(function(req, res){
 	res.end("Hello world\n");
 });
 
-s.listen(8000);
+s.listen(process.env.PORT || PORT);
