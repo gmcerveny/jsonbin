@@ -74,8 +74,15 @@ s.on('request', function(request, response){
 	
 	// paths /get | /set
 	var urlAction = urlParts.pathname.substr(1,3);
+	var message;
 
-	if (urlAction == 'new') {
+	if (urlAction == 'all') {
+		message = 'All\n';
+		bins.forEach( function(bin) {
+			message += 'key: ' + bin.key + '\n' + 'data: ' + bin.data + '\n\n';
+		});
+		respond(response, message);
+	} else if (urlAction == 'new') {
 		var bin = addBin();
 		message = "new bin " + bin.key + "\n";
 		message += "access at http://jsonbin.herokuapp.com/get/" + bin.key;
