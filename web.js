@@ -58,61 +58,64 @@ var getBin = function (key) {
 		return emptyBin;
 }
 
-var parsePost = function(request, callback) {
-
-}
-
-var s = http.createServer();
-
 var respond = function(response, message){
 	response.writeHead(200, { 'content-type' : 'text/plain' });
 	response.end(message + '\n');
 }
 
+var s = http.createServer();
+
 s.on('request', function(request, response){ 
+	var message;
 	var urlParts = url.parse(request.url);
 	
-	// paths /get | /set
-	var urlAction = urlParts.pathname.substr(1,3);
-	var message;
+	console.log(request.method);
+	switch (request.method) {
+		case "POST":
+			var bin = addBin();
+			message = "access at http://jsonbin.herokuapp.com/" + bin.key;
+			respond(response, message);
+			break;
+		case "PUT":
+			var key = urlParts.pathname.substr(1);
+			var bin = getBin(key);
 
-	if (urlAction == 'all') {
-		message = 'All\n';
-		bins.forEach( function(bin) {
-			message += 'key: ' + bin.key + '\n' + 'data: ' + bin.data + '\n\n';
-		});
-		respond(response, message);
-	} else if (urlAction == 'new') {
-		var bin = addBin();
-		message = "new bin " + bin.key + "\n";
-		message += "access at http://jsonbin.herokuapp.com/get/" + bin.key;
-		respond(response, message);
-	} else if (urlAction == 'get') {
-		// path /get/binkey
-		var key = urlParts.pathname.substr(5);
-		var bin = getBin(key);
-		//message = 'key: ' + key + '\n' + bins ;
-		message = bin.data;
-		respond(response, message);
-	} else if (urlAction == 'set') {
-		// path /set/binkey
-		var key = urlParts.pathname.substr(5);
-		var bin = getBin(key);
-		parsePost(request);
-		
-		var data = '';
-		request.on('data', function(chunk) {
-			data += chunk;
-		});
-		request.on('end', function() {
-			var post = querystring.parse(data);
-			bin.data = JSON.stringify(post);
+			if (bin == emptyBin) {
+				message = bin.data;
+				respond(response, message);
+				break;
+			}
+			
+			var data = '';
+			request.on('data', function(chunk) {
+				data += chunk;
+			});
+			request.on('end', function() {
+				var post = querystring.parse(data);
+				bin.data = JSON.stringify(post);
+				message = bin.data;
+				respond(response, message);
+			});
+			break;
+		case "GET":
+			if (urlParts.pathname == "/all") {
+				message = 'All\n';
+				bins.forEach( function(bin) {
+				message += 'key: ' + bin.key + '\n' + 'data: ' + bin.data + '\n\n';
+				});
+				respond(response, message);
+				break;
+			}
+				
+			var key = urlParts.pathname.substr(1);
+			var bin = getBin(key);
 			message = bin.data;
 			respond(response, message);
-		});
-	} else {
-		var message = "no action specified/n";
-		respond(response, message);
+			break;		
+		default:
+			var message = "no action specified/n";
+			respond(response, message);
+			break;
 	}
 });
 
