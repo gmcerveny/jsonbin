@@ -1,10 +1,10 @@
 var PORT = 5000;
 
-var http = require ('http');
+var http = require('http');
 var url = require('url');
 var querystring = require('querystring');
 
-var bins = new Object();
+var bins = {};
 
 var emptyBin = {
 		'key': '',
@@ -12,16 +12,17 @@ var emptyBin = {
 		'data': '{ "message" : "no bin found" }'
 	};
 
-var generateKey = function() {
-	var max = Math.pow(16,8);
-	var min = Math.pow(16,7);
-	var keyNumber = Math.floor(Math.random() * (max - min )) + min;
+var generateKey = function () {
+	var max = Math.pow(16, 8);
+	var min = Math.pow(16, 7);
+	var keyNumber = Math.floor(Math.random() * (max - min)) + min;
 	var keyHex = keyNumber.toString(16);
 	
-	if ( !bins.hasOwnProperty('keyHex') )
+	if (!bins.hasOwnProperty(keyHex)) {
 		return keyHex;
-	else
-		return generateKey();
+	}
+	
+	return generateKey();
 }
 
 var addBin = function (data) {
@@ -55,7 +56,7 @@ var respond = function (response, message){
 
 var s = http.createServer();
 
-s.on('request', function(request, response){ 
+s.on('request', function (request, response){ 
 	var message;
 	var urlParts = url.parse(request.url);
 	
@@ -77,10 +78,10 @@ s.on('request', function(request, response){
 			}
 			
 			var data = '';
-			request.on('data', function(chunk) {
+			request.on('data', function (chunk) {
 				data += chunk;
 			});
-			request.on('end', function() {
+			request.on('end', function () {
 				var post = querystring.parse(data);
 				bin.data = JSON.stringify(post);
 				message = bin.data;
