@@ -1,30 +1,16 @@
-PORT = 5000;
+var PORT = 5000;
 
 var http = require ('http');
 var url = require('url');
 var querystring = require('querystring');
 
-var bins = [];
+var bins = new Object();
+
 var emptyBin = {
 		'key': '',
 		'date': '',
 		'data': '{ "message" : "no bin found" }'
 	};
-
-// indexOfBin() could be used for this test, just trying out different class functions
-var validKey = function(key) {
-	return !bins.some( 
-		function (bin) { return bin.key == key;}
-	);
-}
-
-var indexOfBin = function (key) {
-	for ( var i = 0; i < bins.length; i++) {
-		if (bins[i].key == key)
-			return i;
-	}
-	return -1;
-}
 
 var generateKey = function() {
 	var max = Math.pow(16,8);
@@ -32,33 +18,37 @@ var generateKey = function() {
 	var keyNumber = Math.floor(Math.random() * (max - min )) + min;
 	var keyHex = keyNumber.toString(16);
 	
-	if ( validKey(keyHex) )
+	if ( !bins.hasOwnProperty('keyHex') )
 		return keyHex;
 	else
 		return generateKey();
 }
 
-var addBin = function(data) {
+var addBin = function (data) {
 	if (!data)
 		data = '';	
+	
+	var key = generateKey();
+	
 	var newBin = {	
-		'key': generateKey(), 
+		'key': key, 
 		'date': Date.now(), 
 		'data': data
 	};
-	bins.push(newBin);
+	
+	bins[key] = newBin;
+	
 	return newBin;
 }
 
 var getBin = function (key) {
-	var i = indexOfBin(key);
-	if ( i > -1 )
-		return bins[i];
+	if ( bins.hasOwnProperty(key) )
+		return bins[key];
 	else
 		return emptyBin;
 }
 
-var respond = function(response, message){
+var respond = function (response, message){
 	response.writeHead(200, { 'content-type' : 'text/plain' });
 	response.end(message + '\n');
 }
@@ -100,9 +90,13 @@ s.on('request', function(request, response){
 		case "GET":
 			if (urlParts.pathname == "/all") {
 				message = 'All\n';
-				bins.forEach( function(bin) {
-				message += 'key: ' + bin.key + '\n' + 'data: ' + bin.data + '\n\n';
-				});
+				
+				for(var property in bins) {
+ 				   if(bins.hasOwnProperty(property)) 
+ 				   		var bin = bins[property];
+				        message += 'key: ' + bin.key + '\n' + 'data: ' + bin.data + '\n\n';
+				}
+				
 				respond(response, message);
 				break;
 			}
