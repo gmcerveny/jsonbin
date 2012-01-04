@@ -23,11 +23,12 @@ var generateKey = function () {
 	}
 	
 	return generateKey();
-}
+};
 
 var addBin = function (data) {
-	if (!data)
-		data = '';	
+	if (!data){
+		data = '';
+	}
 	
 	var key = generateKey();
 	
@@ -40,19 +41,20 @@ var addBin = function (data) {
 	bins[key] = newBin;
 	
 	return newBin;
-}
+};
 
 var getBin = function (key) {
-	if ( bins.hasOwnProperty(key) )
+	if ( bins.hasOwnProperty(key) ) {
 		return bins[key];
-	else
+	} else {
 		return emptyBin;
-}
+	}
+};
 
 var respond = function (response, message){
 	response.writeHead(200, { 'content-type' : 'text/plain' });
 	response.end(message + '\n');
-}
+};
 
 var s = http.createServer();
 
