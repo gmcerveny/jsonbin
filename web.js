@@ -62,18 +62,20 @@ s.on('request', function (request, response){
 	var message;
 	var urlParts = url.parse(request.url);
 	
+	var bin, key, property;
+	
 	console.log(request.method);
 	switch (request.method) {
 		case "POST":
-			var bin = addBin();
+			bin = addBin();
 			message = "access at http://jsonbin.herokuapp.com/" + bin.key;
 			respond(response, message);
 			break;
 		case "PUT":
-			var key = urlParts.pathname.substr(1);
-			var bin = getBin(key);
+			key = urlParts.pathname.substr(1);
+			bin = getBin(key);
 
-			if (bin == emptyBin) {
+			if (bin === emptyBin) {
 				message = bin.data;
 				respond(response, message);
 				break;
@@ -91,26 +93,27 @@ s.on('request', function (request, response){
 			});
 			break;
 		case "GET":
-			if (urlParts.pathname == "/all") {
+			if (urlParts.pathname === "/all") {
 				message = 'All\n';
 				
-				for(var property in bins) {
- 				   if(bins.hasOwnProperty(property)) 
- 				   		var bin = bins[property];
-				        message += 'key: ' + bin.key + '\n' + 'data: ' + bin.data + '\n\n';
+				for(property in bins) {
+					if(bins.hasOwnProperty(property)) {
+						bin = bins[property];
+						message += 'key: ' + bin.key + '\n' + 'data: ' + bin.data + '\n\n';
+					}
 				}
 				
 				respond(response, message);
 				break;
 			}
 				
-			var key = urlParts.pathname.substr(1);
-			var bin = getBin(key);
+			key = urlParts.pathname.substr(1);
+			bin = getBin(key);
 			message = bin.data;
 			respond(response, message);
 			break;		
 		default:
-			var message = "no action specified/n";
+			message = "no action specified/n";
 			respond(response, message);
 			break;
 	}
